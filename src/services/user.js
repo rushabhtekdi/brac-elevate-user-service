@@ -39,14 +39,6 @@ module.exports = class UserHelper {
 	 */
 	static async update(bodyData, id, orgCode, tenantCode, skipRequiredValidation = false) {
 		try {
-			if (bodyData.hasOwnProperty('email')) {
-				return responses.failureResponse({
-					message: 'EMAIL_UPDATE_FAILED',
-					statusCode: httpStatusCode.bad_request,
-					responseCode: 'CLIENT_ERROR',
-				})
-			}
-
 			const user = await userQueries.findOne({
 				id: id,
 				tenant_code: tenantCode,
@@ -90,6 +82,56 @@ module.exports = class UserHelper {
 					responseCode: 'CLIENT_ERROR',
 					result: res.errors,
 				})
+			}
+
+			// Encrypt email before it is persisted, same treatment as phone below. Unlike phone,
+			// users.email has no DB-level unique constraint, so this pre-check is the only thing
+			// preventing two users in the same tenant ending up with the same email.
+			if (bodyData.email) {
+				bodyData.email = emailEncryption.encrypt(String(bodyData.email).toLowerCase())
+
+				const existingEmailUser = await userQueries.findOne(
+					{
+						email: bodyData.email,
+						tenant_code: tenantCode,
+						id: { [Op.ne]: id },
+					},
+					{ attributes: ['id'] }
+				)
+				if (existingEmailUser) {
+					return responses.failureResponse({
+						message: 'EMAIL_ALREADY_EXISTS',
+						statusCode: httpStatusCode.bad_request,
+						responseCode: 'CLIENT_ERROR',
+					})
+				}
+			}
+
+			// Encrypt phone before it is persisted. Must run after validateInput (which checks the
+			// raw phone format) and before restructureBody/updateUser write it to the DB, otherwise
+			// this column is stored as plaintext and later crashes any read path that decrypts it.
+			if (bodyData.phone) {
+				bodyData.phone = emailEncryption.encrypt(String(bodyData.phone))
+
+				// users.phone has a unique_phone_per_tenant DB constraint. Since encryption uses a
+				// fixed key/IV, the same plaintext phone always produces the same ciphertext, so a
+				// pre-check here catches collisions with a clean error instead of an unhandled
+				// Sequelize UniqueConstraintError.
+				const existingPhoneUser = await userQueries.findOne(
+					{
+						phone: bodyData.phone,
+						tenant_code: tenantCode,
+						id: { [Op.ne]: id },
+					},
+					{ attributes: ['id'] }
+				)
+				if (existingPhoneUser) {
+					return responses.failureResponse({
+						message: 'PHONE_ALREADY_EXISTS',
+						statusCode: httpStatusCode.bad_request,
+						responseCode: 'CLIENT_ERROR',
+					})
+				}
 			}
 
 			let userModel = await userQueries.getColumns()

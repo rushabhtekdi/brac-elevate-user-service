@@ -6,6 +6,7 @@
  */
 const common = require('@constants/common')
 const filterRequestBody = require('../common')
+const accountValidators = require('./account')
 const { tenant } = require('@constants/blacklistConfig')
 
 module.exports = {
@@ -137,5 +138,14 @@ module.exports = {
 			.withMessage('upload_type is required')
 			.custom((value) => allowedTypes.includes(value.toUpperCase()))
 			.withMessage(`upload_type must be one of: ${allowedTypes.join(', ')}`)
+	},
+
+	accountCreate: (req) => {
+		// This route calls the same accountService.create() as account.js's create(), which
+		// previously had no validator entry at all. Reuses account.js's shared update()
+		// validation (name + phone/phone_code) rather than create() itself, since create()'s
+		// username/email/password rules don't match what this route actually receives (e.g.
+		// dotted usernames like "first.last2" are valid here but rejected by create()'s regex).
+		accountValidators.update(req)
 	},
 }
