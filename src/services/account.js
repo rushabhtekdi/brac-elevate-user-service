@@ -322,7 +322,7 @@ module.exports = class AccountHelper {
 				role = await roleQueries.findAll(
 					{
 						title: {
-							[Op.in]: req.body.roles ? req.body.roles.split(',') : process.env.DEFAULT_ROLE.split(','),
+							[Op.in]: bodyData.roles ? bodyData.roles.split(',') : process.env.DEFAULT_ROLE.split(','),
 						},
 						tenant_code: tenantDetail.code,
 					},
@@ -546,7 +546,7 @@ module.exports = class AccountHelper {
 					refreshToken
 				)
 
-				result = { access_token: accessToken, refresh_token: refreshToken }
+				result = { access_token: accessToken, refresh_token: refreshToken, user }
 			}
 
 			//	user.user_roles = roleData
