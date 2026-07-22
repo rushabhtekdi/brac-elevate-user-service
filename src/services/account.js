@@ -546,7 +546,8 @@ module.exports = class AccountHelper {
 					refreshToken
 				)
 
-				result = { access_token: accessToken, refresh_token: refreshToken, user }
+				result['access_token'] = accessToken
+				result['refresh_token'] = refreshToken
 			}
 
 			//	user.user_roles = roleData
