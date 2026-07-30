@@ -322,7 +322,7 @@ module.exports = class AccountHelper {
 				role = await roleQueries.findAll(
 					{
 						title: {
-							[Op.in]: bodyData.roles ? bodyData.roles.split(',') : process.env.DEFAULT_ROLE.split(','),
+							[Op.in]: typeof bodyData.roles === 'string' ? bodyData.roles.split(',') : (Array.isArray(bodyData.roles) ? bodyData.roles : process.env.DEFAULT_ROLE.split(',')),
 						},
 						tenant_code: tenantDetail.code,
 					},
