@@ -1,4 +1,4 @@
-name: Build & Push Docker Image to GHCR
+name: Build & Push Multi-Arch Docker Image
 
 on:
   push:
@@ -17,7 +17,6 @@ env:
 
 jobs:
   docker:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +29,7 @@ jobs:
           echo "Repository : ${{ github.repository }}"
           echo "Owner      : ${{ github.repository_owner }}"
           echo "Ref        : ${{ github.ref }}"
+          echo "Ref Name   : ${{ github.ref_name }}"
 
       - name: Verify GITHUB_TOKEN
         run: |
@@ -70,10 +70,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-
-          platforms: |
-            linux/amd64,
-            linux/arm64
+          platforms: linux/amd64,linux/arm64
 
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -84,4 +81,39 @@ jobs:
       - name: Verify Published Manifest
         run: |
           docker buildx imagetools inspect \
-          ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+
+      - name: Cleanup old GHCR package versions (keep latest 3)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PACKAGE: ${{ github.event.repository.name }}
+        run: |
+          echo "Repository Owner : ${OWNER}"
+          echo "Package          : ${PACKAGE}"
+
+          echo "Fetching package versions..."
+
+          IDS=$(gh api \
+            /orgs/${OWNER}/packages/container/${PACKAGE}/versions \
+            --paginate \
+            --jq 'sort_by(.created_at) | reverse | .[3:] | .[].id')
+
+          if [ -z "$IDS" ]; then
+            echo "Only 3 or fewer versions exist. Nothing to delete."
+            exit 0
+          fi
+
+          echo "Deleting old versions..."
+
+          echo "$IDS" | while read ID
+          do
+            echo "Deleting package version: ${ID}"
+
+            gh api \
+              --method DELETE \
+              /orgs/${OWNER}/packages/container/${PACKAGE}/versions/${ID}
+
+          done
+
+          echo "Cleanup completed."
