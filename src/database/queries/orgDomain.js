@@ -1,5 +1,5 @@
 'use strict'
-const organizationDomain = require('../models/index').OrganizationDomain
+const organizationDomain = require('../models/index').organization_email_domains
 
 exports.create = async (data) => {
 	try {
