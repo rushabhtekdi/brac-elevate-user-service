@@ -1,7 +1,7 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
 	const OrganizationDomain = sequelize.define(
-		'OrganizationDomain',
+		'organization_email_domains',
 		{
 			id: {
 				type: DataTypes.INTEGER,
@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			organization_id: {
 				type: DataTypes.INTEGER,
+				allowNull: false,
+			},
+			code: {
+				type: DataTypes.STRING,
 				allowNull: false,
 			},
 			domain: {
