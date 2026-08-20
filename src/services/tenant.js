@@ -360,9 +360,9 @@ module.exports = class tenantHelper {
 								user_type: userRole.user_type,
 								status: userRole.status,
 								visibility: userRole.visibility,
-								tenant_code: tenantCreateResponse.code,
 							},
-							defaultOrgId
+							defaultOrgId,
+							tenantCreateResponse.code
 						)
 					})
 
