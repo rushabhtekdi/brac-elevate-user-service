@@ -29,7 +29,7 @@ const validateName = (req, { optional = false } = {}) => {
 const validatePhoneWithCode = (req) => {
 	// Numbers only, no length restriction (digit-count enforcement left to the UI)
 	req.checkBody('phone')
-		.optional()
+		.optional({ checkFalsy: true })
 		.trim()
 		.matches(/^[0-9]+$/)
 		.withMessage('phone must contain only numbers')
