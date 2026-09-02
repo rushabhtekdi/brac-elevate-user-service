@@ -601,7 +601,7 @@ module.exports = class AccountHelper {
 						{ tenant_code: tenantDetail.code },
 						{ attributes: ['domain'] }
 					)
-					portalURL = foundDomain?.domain || process.env.PORTAL_URL || ''
+					portalURL = foundDomain?.domain
 				}
 
 				notificationUtils.sendEmailNotification({
