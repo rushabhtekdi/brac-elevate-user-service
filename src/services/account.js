@@ -151,24 +151,58 @@ module.exports = class AccountHelper {
 				return // Skip if no criteria
 			}
 
-			// Check if user already exists with email or phone or username
-			let user = await userQueries.findOne(
-				{
-					[Op.or]: criteria,
-					password: { [Op.ne]: null },
-					tenant_code: tenantDetail.code,
-				},
-				{
-					attributes: ['id'],
+			if (encryptedEmailId) {
+				const existingEmailUser = await userQueries.findOne(
+					{
+						email: encryptedEmailId,
+						password: { [Op.ne]: null },
+						tenant_code: tenantDetail.code,
+					},
+					{ attributes: ['id'] }
+				)
+				if (existingEmailUser) {
+					return responses.failureResponse({
+						message: 'EMAIL_ALREADY_EXISTS',
+						statusCode: httpStatusCode.bad_request,
+						responseCode: 'CLIENT_ERROR',
+					})
 				}
-			)
+			}
 
-			if (user) {
-				return responses.failureResponse({
-					message: 'USER_ALREADY_EXISTS',
-					statusCode: httpStatusCode.not_acceptable,
-					responseCode: 'CLIENT_ERROR',
-				})
+			if (encryptedPhoneNumber) {
+				const existingPhoneUser = await userQueries.findOne(
+					{
+						phone: encryptedPhoneNumber,
+						password: { [Op.ne]: null },
+						tenant_code: tenantDetail.code,
+					},
+					{ attributes: ['id'] }
+				)
+				if (existingPhoneUser) {
+					return responses.failureResponse({
+						message: 'PHONE_ALREADY_EXISTS',
+						statusCode: httpStatusCode.bad_request,
+						responseCode: 'CLIENT_ERROR',
+					})
+				}
+			}
+
+			if (bodyData.username) {
+				const existingUsername = await userQueries.findOne(
+					{
+						username: bodyData.username,
+						password: { [Op.ne]: null },
+						tenant_code: tenantDetail.code,
+					},
+					{ attributes: ['id'] }
+				)
+				if (existingUsername) {
+					return responses.failureResponse({
+						message: 'USERNAME_TAKEN',
+						statusCode: httpStatusCode.not_acceptable,
+						responseCode: 'CLIENT_ERROR',
+					})
+				}
 			}
 
 			// OTP validation
