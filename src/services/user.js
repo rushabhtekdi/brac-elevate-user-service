@@ -84,9 +84,6 @@ module.exports = class UserHelper {
 				})
 			}
 
-			// Encrypt email before it is persisted, same treatment as phone below. Unlike phone,
-			// users.email has no DB-level unique constraint, so this pre-check is the only thing
-			// preventing two users in the same tenant ending up with the same email.
 			if (bodyData.email) {
 				bodyData.email = emailEncryption.encrypt(String(bodyData.email).toLowerCase())
 
@@ -107,16 +104,8 @@ module.exports = class UserHelper {
 				}
 			}
 
-			// Encrypt phone before it is persisted. Must run after validateInput (which checks the
-			// raw phone format) and before restructureBody/updateUser write it to the DB, otherwise
-			// this column is stored as plaintext and later crashes any read path that decrypts it.
 			if (bodyData.phone) {
 				bodyData.phone = emailEncryption.encrypt(String(bodyData.phone))
-
-				// users.phone has a unique_phone_per_tenant DB constraint. Since encryption uses a
-				// fixed key/IV, the same plaintext phone always produces the same ciphertext, so a
-				// pre-check here catches collisions with a clean error instead of an unhandled
-				// Sequelize UniqueConstraintError.
 				const existingPhoneUser = await userQueries.findOne(
 					{
 						phone: bodyData.phone,
@@ -128,6 +117,24 @@ module.exports = class UserHelper {
 				if (existingPhoneUser) {
 					return responses.failureResponse({
 						message: 'PHONE_ALREADY_EXISTS',
+						statusCode: httpStatusCode.bad_request,
+						responseCode: 'CLIENT_ERROR',
+					})
+				}
+			}
+
+			if (bodyData.username) {
+				const existingUser = await userQueries.findOne(
+					{
+						username: bodyData.username,
+						tenant_code: tenantCode,
+						id: { [Op.ne]: id },
+					},
+					{ attributes: ['id'] }
+				)
+				if (existingUser) {
+					return responses.failureResponse({
+						message: 'USERNAME_TAKEN',
 						statusCode: httpStatusCode.bad_request,
 						responseCode: 'CLIENT_ERROR',
 					})
