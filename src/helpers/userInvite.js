@@ -1241,6 +1241,7 @@ module.exports = class UserInviteHelper {
 										roles: roleToString || '',
 										portalURL: tenantDomains.domain,
 										username: inviteeData.username,
+										password: invitee.password,
 									},
 									tenantCode: tenantDetails.code,
 									organization_code: user.organization_code,
