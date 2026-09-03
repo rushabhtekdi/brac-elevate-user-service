@@ -1210,22 +1210,16 @@ module.exports = class UserInviteHelper {
 								organizations.length > 0
 									? organizations.flatMap((org) =>
 											org.roles && Array.isArray(org.roles)
-												? org.roles.map((role) => role.title)
+												? org.roles.map((role) => role.label || role.title)
 												: []
 									  )
 									: []
 							const roleToString =
 								roles.length > 0
 									? roles
-											.map((roleTitle) => {
-												const cleanTitle = roleTitle ? roleTitle.toLowerCase().trim() : ''
-												return (
-													common.roleDisplayNames[cleanTitle] ||
-													roleTitle
-														.replace(/_/g, ' ')
-														.replace(/\b\w/g, (c) => c.toUpperCase())
-												)
-											})
+											.map((roleTitle) =>
+												roleTitle.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+											)
 											.join(' and ')
 									: ''
 

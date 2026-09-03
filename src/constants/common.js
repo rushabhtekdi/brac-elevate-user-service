@@ -116,11 +116,4 @@ module.exports = {
 	SIGNEDUP_STATUS: 'SIGNEDUP',
 	SEQUELIZE_UNIQUE_CONSTRAINT_ERROR: 'SequelizeUniqueConstraintError',
 	SEQUELIZE_UNIQUE_CONSTRAINT_ERROR_CODE: 'ER_DUP_ENTRY',
-	roleDisplayNames: {
-		admin: 'Admin',
-		tenant_admin: 'Supervisor',
-		org_admin: 'Linkage Champion',
-		mentor: 'Mentor',
-		user: 'Participant',
-	},
 }
