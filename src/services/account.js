@@ -420,8 +420,6 @@ module.exports = class AccountHelper {
 				}),
 				userQueries.getColumns(),
 			])
-			console.log('validationData', validationData)
-			console.log('userModel', userModel)
 
 			const prunedEntities = removeDefaultOrgEntityTypes(validationData, userOrgId)
 
@@ -511,7 +509,7 @@ module.exports = class AccountHelper {
 			}
 
 			/* FLOW STARTED: user login after registration */
-			user = await userQueries.findUserWithOrganization(
+			let user = await userQueries.findUserWithOrganization(
 				{ id: insertedUser.id, tenant_code: tenantDetail.code },
 				{
 					attributes: {
