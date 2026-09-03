@@ -1217,9 +1217,15 @@ module.exports = class UserInviteHelper {
 							const roleToString =
 								roles.length > 0
 									? roles
-											.map((role) =>
-												role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-											)
+											.map((roleTitle) => {
+												const cleanTitle = roleTitle ? roleTitle.toLowerCase().trim() : ''
+												return (
+													common.roleDisplayNames[cleanTitle] ||
+													roleTitle
+														.replace(/_/g, ' ')
+														.replace(/\b\w/g, (c) => c.toUpperCase())
+												)
+											})
 											.join(' and ')
 									: ''
 

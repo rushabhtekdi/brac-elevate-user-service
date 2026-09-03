@@ -603,7 +603,13 @@ module.exports = class AccountHelper {
 			let roleToString =
 				roleArray.length > 0
 					? roleArray
-							.map((role) => role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
+							.map((roleTitle) => {
+								const cleanTitle = roleTitle ? roleTitle.toLowerCase().trim() : ''
+								return (
+									common.roleDisplayNames[cleanTitle] ||
+									roleTitle.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+								)
+							})
 							.join(' and ')
 					: ''
 
