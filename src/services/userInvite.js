@@ -432,8 +432,8 @@ module.exports = class UserInviteHelper {
 							const roleToString =
 								roles.length > 0
 									? roles
-											.map((roleTitle) =>
-												roleTitle.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+											.map((role) =>
+												role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 											)
 											.join(' and ')
 									: ''

@@ -608,7 +608,7 @@ module.exports = class AccountHelper {
 			let roleToString =
 				roleArray.length > 0
 					? roleArray
-							.map((roleTitle) => roleTitle.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
+							.map((role) => role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
 							.join(' and ')
 					: ''
 
