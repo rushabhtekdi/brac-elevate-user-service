@@ -594,9 +594,14 @@ module.exports = class AccountHelper {
 			let roleArray = []
 			if (roleData.length > 0) {
 				const mentorRoleExists = roleData.some((role) => role.title === common.MENTOR_ROLE)
-				roleArray = _.map(roleData, 'title')
+				roleArray = roleData.map((role) => role.label || role.title)
 				if (mentorRoleExists) {
-					_.remove(roleArray, (title) => title === common.MENTEE_ROLE)
+					_.remove(
+						roleArray,
+						(roleName) =>
+							roleName.toLowerCase() === common.MENTEE_ROLE.toLowerCase() ||
+							roleName.toLowerCase() === 'participant'
+					)
 				}
 			}
 

@@ -1210,7 +1210,7 @@ module.exports = class UserInviteHelper {
 								organizations.length > 0
 									? organizations.flatMap((org) =>
 											org.roles && Array.isArray(org.roles)
-												? org.roles.map((role) => role.title)
+												? org.roles.map((role) => role.label || role.title)
 												: []
 									  )
 									: []
