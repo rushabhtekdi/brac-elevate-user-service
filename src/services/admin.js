@@ -479,7 +479,7 @@ module.exports = class AdminHelper {
 			const hasAdminRole = user.user_organizations?.some((org) =>
 				org.roles?.some((r) => {
 					const roleTitle = r.role?.title?.toLowerCase()
-					return roleTitle === common.ADMIN_ROLE || roleTitle === common.TENANT_ADMIN_ROLE
+					return roleTitle === common.ADMIN_ROLE
 				})
 			)
 
