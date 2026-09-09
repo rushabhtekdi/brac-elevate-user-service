@@ -425,7 +425,10 @@ module.exports = class UserInviteHelper {
 
 						if (newUserCred?.id) {
 							const { name, email } = invitee
-							const roles = utils.getRoleTitlesFromId(newInvitee.roles, roleList)
+							const roles = (newInvitee.roles || []).flatMap((roleId) => {
+								const matchedRole = roleList.find((r) => r.id === roleId)
+								return matchedRole ? [matchedRole.label || matchedRole.title] : []
+							})
 							const roleToString =
 								roles.length > 0
 									? roles

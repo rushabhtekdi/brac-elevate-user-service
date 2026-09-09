@@ -235,6 +235,7 @@ module.exports = class AccountHelper {
 				}
 			}
 
+			const rawPassword = bodyData.password
 			bodyData.password = utilsHelper.hashPassword(bodyData.password)
 			if (!bodyData.username) {
 				bodyData.username = await generateUniqueUsername(bodyData.name)
@@ -593,9 +594,14 @@ module.exports = class AccountHelper {
 			let roleArray = []
 			if (roleData.length > 0) {
 				const mentorRoleExists = roleData.some((role) => role.title === common.MENTOR_ROLE)
-				roleArray = _.map(roleData, 'title')
+				roleArray = roleData.map((role) => role.label || role.title)
 				if (mentorRoleExists) {
-					_.remove(roleArray, (title) => title === common.MENTEE_ROLE)
+					_.remove(
+						roleArray,
+						(roleName) =>
+							roleName.toLowerCase() === common.MENTEE_ROLE.toLowerCase() ||
+							roleName.toLowerCase() === 'participant'
+					)
 				}
 			}
 
@@ -625,6 +631,16 @@ module.exports = class AccountHelper {
 			}
 
 			if (plaintextEmailId) {
+				let portalURL = tenantDomain?.domain || ''
+
+				if (!portalURL && tenantDetail?.code) {
+					const foundDomain = await tenantDomainQueries.findOne(
+						{ tenant_code: tenantDetail.code },
+						{ attributes: ['domain'] }
+					)
+					portalURL = foundDomain?.domain
+				}
+
 				notificationUtils.sendEmailNotification({
 					emailId: plaintextEmailId,
 					templateCode: process.env.REGISTRATION_EMAIL_TEMPLATE_CODE,
@@ -632,7 +648,8 @@ module.exports = class AccountHelper {
 						name: bodyData.name,
 						appName: tenantDetail.name,
 						roles: roleToString || '',
-						portalURL: tenantDomain.domain,
+						portalURL,
+						password: rawPassword,
 					},
 					tenantCode: tenantDetail.code,
 					organization_code: user.organizations?.[0].code || null,

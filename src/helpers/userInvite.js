@@ -1210,7 +1210,7 @@ module.exports = class UserInviteHelper {
 								organizations.length > 0
 									? organizations.flatMap((org) =>
 											org.roles && Array.isArray(org.roles)
-												? org.roles.map((role) => role.title)
+												? org.roles.map((role) => role.label || role.title)
 												: []
 									  )
 									: []
@@ -1241,6 +1241,7 @@ module.exports = class UserInviteHelper {
 										roles: roleToString || '',
 										portalURL: tenantDomains.domain,
 										username: inviteeData.username,
+										password: invitee.password,
 									},
 									tenantCode: tenantDetails.code,
 									organization_code: user.organization_code,
